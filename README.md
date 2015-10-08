@@ -1,1 +1,1 @@
-# Simple-Chat-Sever-in-Java
+# Simple-Chat-Server-in-Java

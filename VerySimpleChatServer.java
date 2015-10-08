@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public class VerySimpleChatServer {
 	ArrayList<PrintWriter> clients;
 	ArrayList<ObjectOutputStream> outputStreams;
+	ArrayList<String> currentlyConnectedUsers;
 	public class ClientHandler implements Runnable {
 		// Constructor takes a client socket
 		// creates a reader
@@ -22,8 +23,12 @@ public class VerySimpleChatServer {
 				ObjectInputStream ois = new ObjectInputStream(sock.getInputStream());
 				UserData user = (UserData) ois.readObject();
 				System.out.println(user.userName + " just connected");
+				currentlyConnectedUsers.add(user.userName);
 				//tellEveryone(user.userName + " entered the room.");
 				tellEveryone2(new Message(user.userName, " entered the room"));
+				MetaData md = new MetaData();
+				md.connectedUsers = new ArrayList<String>(currentlyConnectedUsers);
+				sendMetaData(md);
 				//BufferedReader reader = new BufferedReader(inStream);
 				//String msg;
 				/*
@@ -73,6 +78,7 @@ public class VerySimpleChatServer {
 		*/
 		clients = new ArrayList<PrintWriter>();
 		outputStreams = new ArrayList<ObjectOutputStream>();
+		currentlyConnectedUsers = new ArrayList<String>();
 		try {
 			ServerSocket sock = new ServerSocket(5000);
 			System.out.println("Listening for clients to connect");
@@ -116,6 +122,18 @@ public class VerySimpleChatServer {
 		for(ObjectOutputStream s : outputStreams){
 			try{
 				s.writeObject(m);
+			} catch (Exception ex){
+				ex.printStackTrace();
+			}
+		}
+	}
+	
+	public void sendMetaData(MetaData md){
+		// distributes the message to all clients in the list,
+
+		for(ObjectOutputStream s : outputStreams){
+			try{
+				s.writeObject(md);
 			} catch (Exception ex){
 				ex.printStackTrace();
 			}
